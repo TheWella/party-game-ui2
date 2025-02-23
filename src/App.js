@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
 
-const socket = io("https://your-project-name.glitch.me");
+const socket = io("https://party-game-server.glitch.me");
 
 export default function PartyGameLobby() {
   const [roomCode, setRoomCode] = useState("");
