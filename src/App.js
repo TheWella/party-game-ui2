@@ -17,7 +17,7 @@ export default function PartyGameLobby() {
 
   useEffect(() => {
     socket.on("updateLobby", (roomData) => {
-      setPlayers(Object.values(roomData.players));
+      setPlayers(roomData.players);
       setNsfwMode(roomData.nsfw);
       setHost(roomData.host);
     });
@@ -35,8 +35,9 @@ export default function PartyGameLobby() {
     setErrorMessage("");
     const newRoomCode = Math.random().toString(36).substr(2, 5).toUpperCase();
     setRoomCode(newRoomCode);
-    socket.emit("createRoom", { roomCode: newRoomCode, host: username });
     setHost(username);
+    setPlayers([username]); // Add the host to the players list immediately
+    socket.emit("createRoom", { roomCode: newRoomCode, host: username });
     setInRoom(true);
   };
 
@@ -57,8 +58,6 @@ export default function PartyGameLobby() {
   const toggleNSFW = () => {
     if (username === host) {
       socket.emit("toggleNSFW", roomCode);
-    } else {
-      setErrorMessage("Only the host can toggle NSFW mode.");
     }
   };
 
@@ -117,3 +116,4 @@ export default function PartyGameLobby() {
     </div>
   );
 }
+
