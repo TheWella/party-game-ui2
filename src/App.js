@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
 
-const socket = io("https://party-game-server.glitch.me");
+const socket = io("https://your-project-name.glitch.me");
 
 export default function PartyGameLobby() {
   const [roomCode, setRoomCode] = useState("");
@@ -10,6 +10,9 @@ export default function PartyGameLobby() {
   const [nsfwMode, setNsfwMode] = useState(false);
   const [inRoom, setInRoom] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [selectedGame, setSelectedGame] = useState("");
+
+  const miniGames = ["Don't Say Umm", "Word Association", "Story Builder", "Charades"];
 
   useEffect(() => {
     socket.on("updateLobby", (roomData) => {
@@ -17,8 +20,8 @@ export default function PartyGameLobby() {
       setNsfwMode(roomData.nsfw);
     });
     
-    socket.on("gameStarted", () => {
-      alert("Game is starting!");
+    socket.on("gameStarted", (game) => {
+      alert(`Game Starting: ${game}`);
     });
   }, []);
 
@@ -58,7 +61,8 @@ export default function PartyGameLobby() {
       return;
     }
     setErrorMessage("");
-    socket.emit("startGame", roomCode);
+    const gameToStart = selectedGame || miniGames[Math.floor(Math.random() * miniGames.length)];
+    socket.emit("startGame", { roomCode, gameToStart });
   };
 
   return (
@@ -84,6 +88,15 @@ export default function PartyGameLobby() {
             <div className="flex justify-between mt-4">
               <label>NSFW Mode</label>
               <input type="checkbox" checked={nsfwMode} onChange={toggleNSFW} />
+            </div>
+            <div className="mt-4">
+              <label className="block mb-2">Select Mini-Game</label>
+              <select value={selectedGame} onChange={(e) => setSelectedGame(e.target.value)} className="p-2 border rounded w-full">
+                <option value="">Random Mini-Game</option>
+                {miniGames.map((game, index) => (
+                  <option key={index} value={game}>{game}</option>
+                ))}
+              </select>
             </div>
             <button className="mt-4 w-full bg-red-500 text-white p-2 rounded" onClick={startGame}>Start Game</button>
           </div>
