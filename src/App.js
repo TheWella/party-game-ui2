@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import io from "socket.io-client";
 
 const socket = io("https://your-project-name.glitch.me");
 
@@ -62,32 +63,32 @@ export default function PartyGameLobby() {
 
   return (
     <div className={`min-h-screen flex flex-col items-center justify-center ${nsfwMode ? "bg-gray-900 text-white" : "bg-blue-200"}`}>
-      <Card className="p-6 w-96 text-center">
+      <div className="p-6 w-96 text-center bg-white shadow-md rounded-lg">
         {!inRoom ? (
-          <CardContent>
+          <div>
             <h1 className="text-2xl font-bold">Party Game Lobby</h1>
             {errorMessage && <p className="text-red-500">{errorMessage}</p>}
-            <Input placeholder="Enter Username" value={username} onChange={(e) => setUsername(e.target.value)} className="mt-2" />
-            <div className="flex gap-2 mt-4">
-              <Button onClick={createRoom}>Create Room</Button>
-              <Input placeholder="Enter Room Code" value={roomCode} onChange={(e) => setRoomCode(e.target.value)} />
-              <Button onClick={joinRoom}>Join Room</Button>
+            <input type="text" placeholder="Enter Username" value={username} onChange={(e) => setUsername(e.target.value)} className="mt-2 p-2 border rounded w-full" />
+            <div className="flex flex-col gap-2 mt-4">
+              <button className="bg-blue-500 text-white p-2 rounded" onClick={createRoom}>Create Room</button>
+              <input type="text" placeholder="Enter Room Code" value={roomCode} onChange={(e) => setRoomCode(e.target.value)} className="p-2 border rounded w-full" />
+              <button className="bg-green-500 text-white p-2 rounded" onClick={joinRoom}>Join Room</button>
             </div>
-          </CardContent>
+          </div>
         ) : (
-          <CardContent>
+          <div>
             <h1 className="text-xl font-bold">Room Code: {roomCode}</h1>
             {errorMessage && <p className="text-red-500">{errorMessage}</p>}
             <p className="text-sm">Players:</p>
             <ul className="text-lg">{players.map((player, index) => <li key={index}>{player}</li>)}</ul>
             <div className="flex justify-between mt-4">
               <label>NSFW Mode</label>
-              <Switch checked={nsfwMode} onCheckedChange={toggleNSFW} />
+              <input type="checkbox" checked={nsfwMode} onChange={toggleNSFW} />
             </div>
-            <Button className="mt-4 w-full" onClick={startGame}>Start Game</Button>
-          </CardContent>
+            <button className="mt-4 w-full bg-red-500 text-white p-2 rounded" onClick={startGame}>Start Game</button>
+          </div>
         )}
-      </Card>
+      </div>
     </div>
   );
 }
