@@ -1,6 +1,4 @@
-import React, { useState, useEffect } from "react";
-import io from "socket.io-client";
-import { Button, Input, Switch, Card, CardContent } from "@/components/ui";
+import React from "react";
 
 const socket = io("https://your-project-name.glitch.me");
 
