@@ -11,6 +11,7 @@ export default function PartyGameLobby() {
   const [inRoom, setInRoom] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [selectedGame, setSelectedGame] = useState("");
+  const [host, setHost] = useState(null);
 
   const miniGames = ["Don't Say Umm", "Word Association", "Story Builder", "Charades"];
 
@@ -18,6 +19,7 @@ export default function PartyGameLobby() {
     socket.on("updateLobby", (roomData) => {
       setPlayers(Object.values(roomData.players));
       setNsfwMode(roomData.nsfw);
+      setHost(roomData.host);
     });
     
     socket.on("gameStarted", (game) => {
@@ -33,7 +35,8 @@ export default function PartyGameLobby() {
     setErrorMessage("");
     const newRoomCode = Math.random().toString(36).substr(2, 5).toUpperCase();
     setRoomCode(newRoomCode);
-    socket.emit("createRoom", newRoomCode);
+    socket.emit("createRoom", { roomCode: newRoomCode, host: username });
+    setHost(username);
     setInRoom(true);
   };
 
@@ -52,12 +55,20 @@ export default function PartyGameLobby() {
   };
 
   const toggleNSFW = () => {
-    socket.emit("toggleNSFW", roomCode);
+    if (username === host) {
+      socket.emit("toggleNSFW", roomCode);
+    } else {
+      setErrorMessage("Only the host can toggle NSFW mode.");
+    }
   };
 
   const startGame = () => {
     if (players.length < 2) {
       setErrorMessage("At least 2 players are required to start the game.");
+      return;
+    }
+    if (username !== host) {
+      setErrorMessage("Only the host can start the game.");
       return;
     }
     setErrorMessage("");
@@ -82,12 +93,13 @@ export default function PartyGameLobby() {
         ) : (
           <div>
             <h1 className="text-xl font-bold">Room Code: {roomCode}</h1>
+            <p className="text-sm">Host: {host}</p>
             {errorMessage && <p className="text-red-500">{errorMessage}</p>}
             <p className="text-sm">Players:</p>
             <ul className="text-lg">{players.map((player, index) => <li key={index}>{player}</li>)}</ul>
             <div className="flex justify-between mt-4">
               <label>NSFW Mode</label>
-              <input type="checkbox" checked={nsfwMode} onChange={toggleNSFW} />
+              <input type="checkbox" checked={nsfwMode} onChange={toggleNSFW} disabled={username !== host} />
             </div>
             <div className="mt-4">
               <label className="block mb-2">Select Mini-Game</label>
@@ -98,7 +110,7 @@ export default function PartyGameLobby() {
                 ))}
               </select>
             </div>
-            <button className="mt-4 w-full bg-red-500 text-white p-2 rounded" onClick={startGame}>Start Game</button>
+            <button className="mt-4 w-full bg-red-500 text-white p-2 rounded" onClick={startGame} disabled={username !== host}>Start Game</button>
           </div>
         )}
       </div>
